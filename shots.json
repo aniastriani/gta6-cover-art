@@ -1,5 +1,1 @@
-[
-  { "name": "1-cover.jpg", "query": "?shot=cover&photo=pier&caption=Sunset%20Heist", "w": 1080, "h": 1080 },
-  { "name": "2-editor.jpg", "query": "?shot=editor&photo=boulevard&caption=Boulevard%20Queen", "w": 1280, "h": 720 },
-  { "name": "3-cover.jpg", "query": "?shot=cover&photo=boulevard&caption=Boulevard%20Queen", "w": 1080, "h": 1080 }
-]
+[{"h":720,"name":"1-cover.jpg","query":"?shot=editor&photos=boulevard,pier&assign=0,1,0&zooms=1.25,1.15,1.35&panx=0.1,-0.1,0.15&pany=-0.4,-0.35,-0.45&caption=Boulevard%20Queen&sub=golden%20hour%2C%20open%20road&layout=diagonal&grade=golden&size=wide","w":1280},{"h":720,"name":"2-editor.jpg","query":"?shot=editor&photos=pier,boulevard&assign=0,1,1&zooms=1,1.1,1.15&pany=0,-0.2,-0.15&caption=Pier%20Pressure&sub=one%20last%20cast%20at%20dusk&layout=hero&grade=golden&size=wide","w":1280},{"h":1280,"name":"3-cover.jpg","query":"?shot=editor&photos=pier,boulevard&assign=0,1,0&zooms=1.2,1.2,1.3&panx=-0.15,0.1,-0.1&pany=-0.4,-0.3,-0.4&caption=Pier%20Pressure&sub=one%20last%20cast%20at%20dusk&layout=diagonal&grade=neon&size=portrait","w":1024},{"h":1024,"name":"4-cover-square.jpg","query":"?shot=editor&photos=boulevard&assign=0&pany=-0.35&caption=Golden%20Hour&sub=cruising%20the%20boulevard&layout=full&grade=dusk&size=square","w":1024}]

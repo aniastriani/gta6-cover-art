@@ -3,20 +3,80 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Cover Snap</title>
+<title>Vice City Nights — Cover Art Maker</title>
 <link rel="stylesheet" href="./style.css">
 </head>
 <body>
 <main class="app">
-  <section class="controls">
-    <h1>Cover Snap</h1>
-    <p>A photo and a caption, made into a square cover.</p>
-    <label>Photo <input id="photo" type="file" accept="image/*"></label>
-    <label>Caption <input id="caption" type="text" maxlength="40" value="Sunset Heist"></label>
-    <button id="export" type="button">Export PNG 1080 x 1080</button>
-    <p id="status" role="status"></p>
+  <section class="controls" aria-label="Cover controls">
+    <header>
+      <h1>Vice City<br>Nights</h1>
+      <p>Turn your photos and a few words into a GTA-style poster cover — made on your machine, nothing uploaded.</p>
+    </header>
+
+    <fieldset>
+      <legend>1 · Photos</legend>
+      <label class="file-label">Add up to 3 photos
+        <input id="photoFiles" type="file" accept="image/*" multiple>
+      </label>
+      <div class="row" id="photoSlots"></div>
+      <div class="row">
+        <button id="sampleBoulevard" type="button" class="ghost">Try sample: Boulevard</button>
+        <button id="samplePier" type="button" class="ghost">Try sample: Pier</button>
+      </div>
+    </fieldset>
+
+    <fieldset>
+      <legend>2 · Layout</legend>
+      <div class="row" id="layoutPick"></div>
+    </fieldset>
+
+    <fieldset>
+      <legend>3 · Colour grade</legend>
+      <div class="row" id="gradePick"></div>
+    </fieldset>
+
+    <fieldset>
+      <legend>4 · Words</legend>
+      <label>Caption
+        <input id="caption" type="text" maxlength="28" value="Vice City Nights" autocomplete="off">
+      </label>
+      <label>Sub-caption
+        <input id="subCaption" type="text" maxlength="60" value="golden hour, open road" autocomplete="off">
+      </label>
+      <label>Caption size
+        <input id="captionSize" type="range" min="0.7" max="1.3" step="0.05" value="1">
+      </label>
+      <label>Caption position
+        <input id="captionPos" type="range" min="-1" max="1" step="0.1" value="0">
+      </label>
+    </fieldset>
+
+    <fieldset>
+      <legend>5 · Selected panel</legend>
+      <div class="row" id="panelPick"></div>
+      <div class="row" id="panelPhotoPick"></div>
+      <label>Zoom
+        <input id="zoom" type="range" min="1" max="2.5" step="0.05" value="1">
+      </label>
+      <p class="hint">Drag the photo inside the preview to move it. Click a panel to select it.</p>
+      <div class="row">
+        <button id="centrePanel" type="button" class="ghost">Centre photo</button>
+      </div>
+    </fieldset>
+
+    <fieldset>
+      <legend>6 · Size &amp; export</legend>
+      <div class="row" id="sizePick"></div>
+      <button id="export" type="button" class="primary">Export PNG</button>
+      <p id="status" role="status"></p>
+    </fieldset>
   </section>
-  <canvas id="cover" width="1080" height="1080" aria-label="The cover"></canvas>
+
+  <section class="stage" aria-label="Live preview">
+    <canvas id="cover" width="960" height="540" aria-label="Cover preview"></canvas>
+    <p class="stage-note">Live preview — what you see is what the PNG will look like.</p>
+  </section>
 </main>
 <script type="module" src="./src/main.js"></script>
 </body>
