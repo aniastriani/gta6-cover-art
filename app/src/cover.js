@@ -1,18 +1,18 @@
 // Vice City Nights — the cover engine.
 //
-// One function, paintCover, draws a whole poster onto any canvas: photo
-// panels in the chosen layout (including slanted, GTA-style diagonal
-// slices), a sunset or neon colour grade washed over them, and a title
-// band with a big bold caption and an italic sub-caption. Everything is
-// plain 2D canvas, so the same code paints the live preview and the
-// full-size PNG that gets exported.
+// paintCover draws a whole poster onto any canvas: the photo panels of
+// the chosen layout (slanted slices included, the GTA multi-panel look),
+// a sunset or neon colour grade washed across them, and a title band
+// carrying a big bold caption over an italic sub-caption. Plain 2D
+// canvas throughout, so the same routine paints both the live preview
+// and the full-size PNG export.
 //
-// A panel is a polygon inside the photo zone, given as fractions of that
-// zone, so a layout can mix rectangles with slanted slices. Each panel
-// remembers which photo fills it and how that photo is cropped: a zoom
-// factor and a pan offset, both set by dragging on the preview or with
-// the panel controls. A photo that is missing leaves a painted sunset
-// placeholder behind, so the poster still reads as a poster before any
+// Panels are polygons inside the photo zone, written as fractions of
+// that zone, which lets a layout mix rectangles with slanted slices.
+// Every panel remembers the photo that fills it and how that photo is
+// cropped: a zoom factor and a pan offset, driven by dragging on the
+// preview or by the panel controls. A panel with no photo gets a painted
+// sunset placeholder instead, so the poster still reads before any
 // photo is loaded.
 
 export const POSTER_SIZES = {
@@ -57,11 +57,9 @@ export const POSTER_GRADES = {
   },
 };
 
-// A layout is a name plus the panels that fill the photo zone, each as
-// corner points in fractions of the zone, plus how tall the title band is
-// (also a fraction of the whole cover). The diagonal layout leans each
-// slice sideways as it runs down the poster, the classic multi-panel
-// cover look.
+// One layout is a name, the height of its title band (a fraction of the
+// whole cover) and the panels that tile the photo zone. The diagonal
+// layout leans each slice sideways as it runs down the poster.
 export const POSTER_LAYOUTS = {
   hero: {
     name: 'Hero Split',
@@ -97,7 +95,7 @@ export const POSTER_LAYOUTS = {
   },
 };
 
-// A tiny seeded random source, so the film grain looks the same on every
+// A small seeded generator, so the film grain is identical on every
 // repaint of the same cover instead of shimmering between frames.
 function seededRandom(seed) {
   let state = seed >>> 0;
@@ -110,7 +108,7 @@ function seededRandom(seed) {
   };
 }
 
-// The bounding box of a panel polygon, in canvas pixels.
+// The axis-aligned bounding box of a panel polygon, in canvas pixels.
 function panelBox(points) {
   let x0 = Infinity;
   let y0 = Infinity;
@@ -125,9 +123,34 @@ function panelBox(points) {
   return { x: x0, y: y0, w: x1 - x0, h: y1 - y0 };
 }
 
-// Draws one photo into one panel, cropped to fill the panel's bounding
-// box, at the panel's zoom and pan. `pan` is { x, y } in fractions of the
-// spare room, -0.5 to 0.5.
+// Turns a panel's fraction points into canvas pixels inside the zone.
+function toPixels(points, zone) {
+  return points.map(([fx, fy]) => [zone.x + fx * zone.w, zone.y + fy * zone.h]);
+}
+
+// Traces a polygon path on the context, without filling or stroking it.
+function tracePolygon(ctx, polygon) {
+  ctx.beginPath();
+  ctx.moveTo(polygon[0][0], polygon[0][1]);
+  for (let k = 1; k < polygon.length; k += 1) ctx.lineTo(polygon[k][0], polygon[k][1]);
+  ctx.closePath();
+}
+
+// Ray-casting test: is the canvas point inside this panel polygon?
+export function pointInPanel(px, py, polygon) {
+  let inside = false;
+  for (let i = 0, j = polygon.length - 1; i < polygon.length; j = i, i += 1) {
+    const [xi, yi] = polygon[i];
+    const [xj, yj] = polygon[j];
+    if ((yi > py) !== (yj > py) && px < ((xj - xi) * (py - yi)) / (yj - yi) + xi) {
+      inside = !inside;
+    }
+  }
+  return inside;
+}
+
+// Covers one panel's bounding box with a photo, at the panel's zoom and
+// pan. `pan` is { x, y } in fractions of the spare room, -0.5 to 0.5.
 function paintPhotoInto(ctx, photo, box, zoom, pan) {
   const base = Math.max(box.w / photo.naturalWidth, box.h / photo.naturalHeight);
   const scale = base * zoom;
@@ -140,8 +163,9 @@ function paintPhotoInto(ctx, photo, box, zoom, pan) {
   ctx.drawImage(photo, dx, dy, drawnW, drawnH);
 }
 
-// Paints a sunset scene where a photo is missing: a warm sky, a low sun
-// and a dark skyline, so an empty panel still looks like poster art.
+// Where a photo is missing, paints a sunset scene in its place: a warm
+// sky, a low sun and a dark skyline, so an empty panel still looks like
+// poster art.
 function paintPlaceholder(ctx, box, grade) {
   const sky = ctx.createLinearGradient(box.x, box.y, box.x, box.y + box.h);
   sky.addColorStop(0, grade.skyTop);
@@ -176,7 +200,7 @@ function paintPlaceholder(ctx, box, grade) {
   ctx.fill();
 }
 
-// Fits the caption to one line: starts big and shrinks until it fits.
+// Fits the caption onto one line: starts big and shrinks until it fits.
 function fitCaptionFont(ctx, text, maxWidth, startSize) {
   let size = startSize;
   ctx.font = `700 ${size}px ViceDisplay, sans-serif`;
@@ -249,24 +273,6 @@ function paintFinish(ctx, w, h) {
   ctx.fillRect(0, 0, w, h);
 }
 
-// Turns a panel's fraction points into canvas pixels inside the zone.
-function toPixels(points, zone) {
-  return points.map(([fx, fy]) => [zone.x + fx * zone.w, zone.y + fy * zone.h]);
-}
-
-// Ray-casting test: is the canvas point inside this panel polygon?
-export function pointInPanel(px, py, polygon) {
-  let inside = false;
-  for (let i = 0, j = polygon.length - 1; i < polygon.length; j = i, i += 1) {
-    const [xi, yi] = polygon[i];
-    const [xj, yj] = polygon[j];
-    if ((yi > py) !== (yj > py) && px < ((xj - xi) * (py - yi)) / (yj - yi) + xi) {
-      inside = !inside;
-    }
-  }
-  return inside;
-}
-
 // Paints the whole cover for a state:
 //   { photos, panels, layout, grade, caption, subCaption, captionScale, captionShift }
 // `photos` holds images (or nulls); `panels` holds one { photo, zoom, pan }
@@ -304,10 +310,7 @@ export function paintCover(canvas, state) {
     const slot = state.panels?.[i] ?? { photo: 0, zoom: 1, pan: { x: 0, y: 0 } };
     const photo = state.photos?.[slot.photo] ?? null;
     ctx.save();
-    ctx.beginPath();
-    ctx.moveTo(polygon[0][0], polygon[0][1]);
-    for (let k = 1; k < polygon.length; k += 1) ctx.lineTo(polygon[k][0], polygon[k][1]);
-    ctx.closePath();
+    tracePolygon(ctx, polygon);
     ctx.clip();
     if (photo) {
       paintPhotoInto(ctx, photo, box, slot.zoom ?? 1, slot.pan ?? { x: 0, y: 0 });
@@ -320,10 +323,7 @@ export function paintCover(canvas, state) {
     ctx.fillStyle = wash;
     ctx.fillRect(box.x, box.y, box.w, box.h);
     ctx.restore();
-    ctx.beginPath();
-    ctx.moveTo(polygon[0][0], polygon[0][1]);
-    for (let k = 1; k < polygon.length; k += 1) ctx.lineTo(polygon[k][0], polygon[k][1]);
-    ctx.closePath();
+    tracePolygon(ctx, polygon);
     ctx.strokeStyle = 'rgba(20, 8, 30, 0.45)';
     ctx.lineWidth = Math.max(1, gutter * 0.5);
     ctx.stroke();

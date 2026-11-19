@@ -13,7 +13,10 @@
 // supplies an `apply` object that knows how to load samples and set each
 // choice; once the scene is painted, window.__shotReady is raised on two
 // animation frames so a headless screenshot waits for the paint.
-function numberList(query, key) {
+
+// Reads a comma-separated list of numbers out of the query string,
+// or null when the parameter is absent.
+function readNumberList(query, key) {
   const raw = query.get(key);
   if (!raw) return null;
   return raw.split(',').map((part) => Number(part));
@@ -33,10 +36,10 @@ export async function runShotScene(shot, query, apply) {
   const photos = query.get('photos');
   if (photos) {
     await apply.loadSamples(photos.split(',').map((name) => `samples/${name.trim()}.jpg`));
-    const assign = numberList(query, 'assign');
-    const zooms = numberList(query, 'zooms');
-    const panx = numberList(query, 'panx');
-    const pany = numberList(query, 'pany');
+    const assign = readNumberList(query, 'assign');
+    const zooms = readNumberList(query, 'zooms');
+    const panx = readNumberList(query, 'panx');
+    const pany = readNumberList(query, 'pany');
     if (assign || zooms || panx || pany) apply.assignPanels({ assign, zooms, panx, pany });
   } else {
     await apply.loadSample(`samples/${photo}.jpg`);
