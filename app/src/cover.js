@@ -1,19 +1,19 @@
 // Vice City Nights — the cover engine.
 //
-// paintCover draws a whole poster onto any canvas: the photo panels of
-// the chosen layout (slanted slices included, the GTA multi-panel look),
-// a sunset or neon colour grade washed across them, and a title band
-// carrying a big bold caption over an italic sub-caption. Plain 2D
-// canvas throughout, so the same routine paints both the live preview
+// paintCover draws a complete poster onto any canvas: the photo panels
+// of the chosen layout (slanted slices included, for the GTA multi-panel
+// look), a sunset or neon colour grade washed over them, and a title band
+// with a big bold caption above an italic sub-caption. It is plain 2D
+// canvas all the way down, so one routine paints both the live preview
 // and the full-size PNG export.
 //
-// Panels are polygons inside the photo zone, written as fractions of
-// that zone, which lets a layout mix rectangles with slanted slices.
-// Every panel remembers the photo that fills it and how that photo is
-// cropped: a zoom factor and a pan offset, driven by dragging on the
-// preview or by the panel controls. A panel with no photo gets a painted
-// sunset placeholder instead, so the poster still reads before any
-// photo is loaded.
+// A panel is a polygon inside the photo zone, given as fractions of that
+// zone, so a layout can mix rectangles with slanted slices. Each panel
+// remembers which photo fills it and how that photo is cropped: a zoom
+// factor and a pan offset, driven by dragging on the preview or by the
+// panel controls. A panel with no photo gets a painted sunset
+// placeholder instead, so the poster still reads before any photo is
+// loaded.
 
 export const POSTER_SIZES = {
   square: { label: 'Square 1080 x 1080', width: 1080, height: 1080 },
@@ -57,9 +57,9 @@ export const POSTER_GRADES = {
   },
 };
 
-// One layout is a name, the height of its title band (a fraction of the
-// whole cover) and the panels that tile the photo zone. The diagonal
-// layout leans each slice sideways as it runs down the poster.
+// A layout is a name, the height of its title band (as a fraction of the
+// whole cover) and the panels that tile the photo zone. In the diagonal
+// layout each slice leans sideways as it runs down the poster.
 export const POSTER_LAYOUTS = {
   hero: {
     name: 'Hero Split',
@@ -95,8 +95,8 @@ export const POSTER_LAYOUTS = {
   },
 };
 
-// A small seeded generator, so the film grain is identical on every
-// repaint of the same cover instead of shimmering between frames.
+// A small seeded generator, so the film grain is the same on every
+// repaint of one cover instead of shimmering between frames.
 function seededRandom(seed) {
   let state = seed >>> 0;
   return () => {
@@ -123,7 +123,7 @@ function panelBox(points) {
   return { x: x0, y: y0, w: x1 - x0, h: y1 - y0 };
 }
 
-// Turns a panel's fraction points into canvas pixels inside the zone.
+// Converts a panel's fraction points into canvas pixels inside the zone.
 function toPixels(points, zone) {
   return points.map(([fx, fy]) => [zone.x + fx * zone.w, zone.y + fy * zone.h]);
 }

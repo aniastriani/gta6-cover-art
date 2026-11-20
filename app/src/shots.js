@@ -1,25 +1,32 @@
-// Fixed scenes for screenshots, driven by the page's query string.
+// Canned screenshot scenes, picked by the page's query string.
+//
+// A cover shot hides the controls and draws one poster full-bleed at
+// export size:
 //
 //   ?shot=cover&photo=pier&caption=Pier%20Pressure&layout=diagonal&grade=neon&size=portrait
-//     draws one cover full-bleed, at the export size, with the controls hidden.
-//   ?shot=editor&photo=boulevard&caption=Boulevard%20Queen
-//     shows the editor with a sample photo already loaded.
 //
-// `photo` names one sample under samples/ (boulevard or pier); `photos`
-// names several, comma-separated, and `assign` says which photo fills
-// each panel, with `zooms`, `panx` and `pany` cropping each panel.
-// `caption` and `sub` set the words; `cscale` and `cshift` size and shift
-// the caption. `layout`, `grade` and `size` pick the look. The caller
-// supplies an `apply` object that knows how to load samples and set each
-// choice; once the scene is painted, window.__shotReady is raised on two
-// animation frames so a headless screenshot waits for the paint.
+// An editor shot keeps the controls visible with a sample photo loaded:
+//
+//   ?shot=editor&photo=boulevard&caption=Boulevard%20Queen
+//
+// Query knobs: `photo` names a single sample under samples/ (boulevard
+// or pier); `photos` names several, comma-separated, while `assign`
+// chooses which photo fills each panel and `zooms`, `panx`, `pany` crop
+// each panel. `caption` and `sub` set the words, `cscale` and `cshift`
+// size and shift the caption, and `layout`, `grade`, `size` pick the
+// look. The caller hands in an `apply` object that knows how to load
+// samples and set each choice. Once the scene is painted,
+// window.__shotReady is raised after two animation frames, so a
+// headless screenshot waits until the paint has landed.
 
-// Reads a comma-separated list of numbers out of the query string,
-// or null when the parameter is absent.
+// Pulls a comma-separated list of numbers out of the query string,
+// returning null when the parameter is not there at all.
 function readNumberList(query, key) {
   const raw = query.get(key);
   if (!raw) return null;
-  return raw.split(',').map((part) => Number(part));
+  const out = [];
+  for (const piece of raw.split(',')) out.push(Number(piece));
+  return out;
 }
 
 export async function runShotScene(shot, query, apply) {
